@@ -1,25 +1,142 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+const statusDisplay = document.querySelector(".game--status");
+
+let gameActive = true;
+let currentPlayer = "X";
+let gameState = ["", "", "", "", "", "", "", "", ""];
+
+const winningMessage = () => `Player ${currentPlayer} has won!`;
+const drawMessage = () => `Game ended in a draw!`;
+const currentPlayerTurn = () => `It's ${currentPlayer}'s turn`;
+
+statusDisplay.innerHTML = currentPlayerTurn();
+
+const winningConditions = [
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8],
+  [0, 3, 6],
+  [1, 4, 7],
+  [2, 5, 8],
+  [0, 4, 8],
+  [2, 4, 6],
+];
+ 
+ const btnStartElement = document.getElementById('btnStart');
+ const btnBackElement = document.getElementById('btnBack');
+ const btnAboutElement = document.getElementById('btnAbout');
+ const btnBack2Element = document.getElementById('btnBack2');
+ 
+
+ const gameStart = document.getElementById('gameStart');
+ const container = document.getElementById('container');
+ const aboutUs = document.getElementById('about');
+
+ 
+function App() { 
+/*Start the game*/
+  btnStartElement.addEventListener("click", startGame);
+  function startGame() {
+    btnStartElement.classList.add('hide');
+    gameStart.classList.remove('hide');
+    container.classList.add('hide');
+  }
+
+  btnBackElement.addEventListener("click", backHome);
+  function backHome() {
+    btnStartElement.classList.remove('hide');
+    gameStart.classList.add('hide');
+    container.classList.remove('hide');
+  }
+
+  btnAboutElement.addEventListener("click", about);
+  function about() {
+    btnStartElement.classList.add('hide');
+    gameStart.classList.add('hide');
+    container.classList.add('hide')
+    aboutUs.classList.remove('hide');
+  }
+
+  btnBack2Element.addEventListener("click", startGame);
+  function startGame() {
+    btnStartElement.classList.add('hide');
+    gameStart.classList.remove('hide');
+    container.classList.add('hide');
+    aboutUs.classList.add('hide');
+  }
+  
+
+  function handleCellPlayed(clickedCell, clickedCellIndex) {
+    gameState[clickedCellIndex] = currentPlayer;
+    clickedCell.innerHTML = currentPlayer;
+  }
+
+  function handlePlayerChange() {
+    currentPlayer = currentPlayer === "X" ? "O" : "X";
+    statusDisplay.innerHTML = currentPlayerTurn();
+  }
+
+  function handleResultValidation() {
+    let roundWon = false;
+    for (let i = 0; i <= 7; i++) {
+      const winCondition = winningConditions[i];
+      let a = gameState[winCondition[0]];
+      let b = gameState[winCondition[1]];
+      let c = gameState[winCondition[2]];
+      if (a === "" || b === "" || c === "") {
+        continue;
+      }
+      if (a === b && b === c) {
+        roundWon = true;
+        break;
+      }
+    }
+
+    if (roundWon) {
+      statusDisplay.innerHTML = winningMessage();
+      gameActive = false;
+      return;
+    }
+
+    let roundDraw = !gameState.includes("");
+    if (roundDraw) {
+      statusDisplay.innerHTML = drawMessage();
+      gameActive = false;
+      return;
+    }
+
+    handlePlayerChange();
+  }
+
+  function handleCellClick(clickedCellEvent) {
+    const clickedCell = clickedCellEvent.target;
+    const clickedCellIndex = parseInt(
+      clickedCell.getAttribute("data-cell-index")
+    );
+
+    if (gameState[clickedCellIndex] !== "" || !gameActive) {
+      return;
+    }
+
+    handleCellPlayed(clickedCell, clickedCellIndex);
+    handleResultValidation();
+  }
+
+  function handleRestartGame() {
+    gameActive = true;
+    currentPlayer = "X";
+    gameState = ["", "", "", "", "", "", "", "", ""];
+    statusDisplay.innerHTML = currentPlayerTurn();
+    document.querySelectorAll(".cell").forEach((cell) => (cell.innerHTML = ""));
+  }
+
+  document
+    .querySelectorAll(".cell")
+    .forEach((cell) => cell.addEventListener("click", handleCellClick));
+  document
+    .querySelector(".btn-secondary")
+    .addEventListener("click", handleRestartGame);
 }
 
 export default App;
